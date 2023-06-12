@@ -1,0 +1,117 @@
+---
+title: "Hands on 1"
+author: "Andrés Casagualpa"
+date: "2023-06-07"
+output: ipynb_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+## g) Create an array of 10 random integers between 1 and 100, and then calculate the mean and standard deviation of the array.
+
+
+```{r}
+a<-c(12,41,23,12,15,97,42,16,78,46)
+a<-array(a)
+cat ("The value of the mean is: ",mean(a), "\n")
+cat("The value of the SDT is: ",sd(a),"\n")
+```
+## The second way to implement the same exercise
+
+
+```{r}
+
+rd_a<- sample(1:100,10)
+cat("The current values of the array is: ",rd_a,"\n")
+cat ("The value of the mean is: ",mean(rd_a),"\n")
+cat ("The value of the mean is: ",sd(rd_a),"\n")
+```
+## h) Create a 2-dimensional array of 3 rows and 4 columns with random integer values. Then, calculate the sum of each row and column.
+```{r}
+#First we need to create the random integer values 
+array <- matrix(sample.int(100, 3 * 4), nrow = 3)
+#Then we need to calculate the sum of each row
+cat("The value of the sum of each row is:",sum(array))
+```
+## i) Create a DataFrame with 3 columns: "Name", "Age", and "City". Add at least 5 rows of data to the DataFrame. Then, filter the DataFrame to only include rows where the person's age is greater than or equal to 30
+```{r}
+df <- data.frame(Nombre = c("Andres", "Juan", "Pedro", "Veronica", "Mireya"),
+                  Edad= c(21, 26, 23, 32, 97),
+                  Ciudad = c("Quito", "Cuenca", "Manta", "El Oro", "Guayaquil"))
+
+print(df)
+# Filter the DataFrame to only include rows where the person's age is greater than or equal to 30
+df_filtered <- df[df$Age >= 30, ]
+print("filtered")
+# Print the filtered DataFrame
+print(df_filtered)
+```
+## (k) Load a CSV file into a DataFrame and then calculate the mean, median, and mode of one of the columns in the DataFrame.
+```{r}
+# Load the CSV file into a DataFrame
+data <- read.csv("decks.csv")
+
+# Calculate the mean of a column
+mean_value <- mean(data$Lands..without.MDFCs)
+
+# Calculate the median of a column
+median_value <- median(data$Lands..without.MDFCs)
+
+# Calculate the mode of a column
+mode_value <- names(table(data$Lands..without.MDFCs))[table(data$Lands..without.MDFCs) == max(table(data$Lands..without.MDFCs))]
+
+# Print the results
+cat("Mean:", mean_value, "\n")
+cat("Median:", median_value, "\n")
+cat("Mode:", mode_value, "\n")
+
+```
+
+##(l) Create a scatter plot of random x and y values between 1 and 100.
+
+```{r}
+# Generate random values for x and y
+x <- runif(100, min = 1, max = 100)
+y <- runif(100, min = 1, max = 100)
+
+# Create the scatter plot
+plot(x, y, pch = 16, col = "blue", xlab = "X", ylab = "Y", main = "Scatter Plot")
+
+# Add labels to the axes
+axis(1, cex.axis = 0.8)
+axis(2, cex.axis = 0.8)
+
+# Add a grid
+grid()
+
+# Add legend
+legend("topleft", legend = "Points", pch = 16, col = "blue")
+
+```
+
+
+## (m) Load a CSV file into a DataFrame and then create a line chart of one of the columns in the DataFrame.
+
+```{r}
+# Load the CSV file into a DataFrame
+data <- read.csv("decks.csv")
+
+# Specify the column index for the line chart
+column_index <- 3
+
+# Create a line chart of the column
+plot(data[, column_index], type = "l", xlab = "Index", ylab = names(data)[column_index], main = "Line Chart")
+
+
+
+```
+

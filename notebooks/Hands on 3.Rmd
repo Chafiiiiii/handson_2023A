@@ -1,0 +1,129 @@
+---
+title: "Hands on 3"
+author: "Andrés Casagualpa"
+date: "2023-06-12"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#3 Hands On: Data Exploration
+
+##1 Summarization
+
+
+```{r}
+#Load the data set carIns final. It already has the imputation of missing values.
+load("C:/Users/LENOVO/Downloads/carIns_final.Rdata")
+
+head(carIns_final,5)
+```
+###1. Using the package dplyr, answer the following questions:
+####(a) Obtain the number of cars by bodyStyle
+```{r}
+library(dplyr)
+carIns_final %>% group_by(bodyStyle) %>% count()
+
+```
+####(b) Obtain the number of cars by bodyStyle and fuelType
+```{r}
+#'group_by' function is used to group the data by bodyStyle and fuelType.
+carIns_final  %>% group_by(bodyStyle, fuelType) %>% count()
+```
+####(c) Obtain the mean and the standard deviation of the attribute cityMpg by bodyStyle in ascending order
+```{r}
+# Modify the previous code to calculate the meand and standard deviation with summarize function
+# Arranges the results in ascending order based on the cityMpg.mean using the arrange function
+carIns_final %>% group_by(bodyStyle) %>% summarize (cityMpg.mean=mean(cityMpg), cityMpg.sd=sd(cityMpg)) %>%
+arrange(cityMpg.mean)
+     
+```
+####(d) Also by bodyStyle, and for the attributes cityMpg and highwayMpg, obtain the mean, the standard deviation, the median and the inter-quartile range.
+```{r}
+#Obtain the mean, standard deviation, median, and interquartile range of cityMpg and highwayMpg by bodyStyle:
+
+carIns_final %>% group_by(bodyStyle) %>% summarize (cityMpg.mean=mean(cityMpg), cityMpg.sd=sd(cityMpg),
+                                                    highwayMpg.median=median( highwayMpg),
+                                                    cityMpg.iqr = IQR(cityMpg))
+```
+##2 Visualization
+###2. Using the package ggplot2, create graphs that you find adequate to answer the following questions.
+
+
+####(e) Show the relationship between the attributes cityMpg and highwayMpg
+```{r}
+#load the library
+library(ggplot2)
+# Set up the base plot using the ggplot() function and specify the dataset carIns_final. Mapping cityMpg to the x-axis and highwayMpg to the y-axis.
+ggplot(carIns_final,aes(x=cityMpg, y=highwayMpg))+geom_point(color='darkgreen')+
+ggtitle("Relatioship between City and Highway")
+```
+####(f) Show the distribution of cars by bodyStyle.
+```{r}
+#Using The geom_bar() function the figure to do the bargraph.
+ggplot(carIns_final, aes(x=bodyStyle))+geom_bar(fill="lightgreen")
+```
+####(g) Show the distribution of cars by price. Suggestion: create bins of width equal to 5000.
+```{r}
+#geom_histogram function is used to do the histogram
+ggplot(carIns_final, aes(x=price))+ geom_histogram(binwidth = 5000, position = "identity", alpha = 0.4)
+```
+####(h) Add the information of the density estimation to the previous graph
+```{r}
+#geom_density() function is used to create a density plot in data visualization.
+ggplot(carIns_final, aes(x=price))+geom_histogram(aes(y = ..density..), binwidth = 5000, position = "identity", alpha = 0.4) +
+  geom_density(color = "green", size = 1)
+```
+####(i) Check (visually) if it is plausible to consider that price follows a normal distribution.
+```{r}
+
+ggplot(carIns_final, aes(x = price)) +
+  geom_histogram(fill = "lightblue", color = "black", bins = 30) +
+  geom_density(color = "red", size = 1) +
+  xlab("Price") +
+  ylab("Frequency / Density") +
+  ggtitle("Distribution of Price")
+```
+####(j) Show the distribution of price by make attribute. Suggestion: use boxplots and the function coord_flip().
+```{r}
+
+#geom_boxplot() is then used to create the boxplots based on these variables
+#coord_flip() is used to flip the x and y axes, resulting in a horizontal orientation of the boxplots
+ggplot(carIns_final, aes(x=make,y=price))+geom_boxplot()+coord_flip()
+```
+####(k) Show the distribution of price by nDoors attribute. Suggestion: use histograms.
+```{r}
+#By using facet_wrap(), you can visualize the distribution of "price" for each category of "nDoors" in separate histograms, allowing for a comparison of price distributions based on the number of doors.
+ggplot(carIns_final, aes(x = price)) +
+  geom_histogram(fill = "lightblue", color = "black", bins = 30) +
+  facet_wrap(~ nDoors, nrow = 1) +
+  xlab("Price") +
+  ylab("Frequency") +
+  ggtitle("Distribution of Price by nDoors")
+```
+####(l) Show the distribution of price by bodyStyle and nDoors attributes. Suggestion: use histograms
+```{r}
+#By using facet_grid(), you can visualize the distribution of "price" for each combination of "bodyStyle" and "nDoors" in separate histograms, allowing for a comparison of price distributions based on both attributes.
+ggplot(carIns_final, aes(x = price)) +
+  geom_histogram(fill = "lightblue", color = "black", bins = 30) +
+  facet_grid(bodyStyle ~ nDoors) +
+  xlab("Price") +
+  ylab("Frequency") +
+  ggtitle("Distribution of Price by Body Style and nDoors")
+```
+####(m) Add the parameter scales="free_y" to the facet function in the previous graph.
+```{r}
+#The addition of scales = "free_y" inside the facet_grid() function ensures that the y-axis scales are adjusted independently for each facet, allowing for better visualization of the distributions of "price" by both "bodyStyle" and "nDoors". This allows for easier comparison and identification of variations in the frequency of prices within each facet.
+ggplot(carIns_final, aes(x = price)) +
+  geom_histogram(fill = "lightblue", color = "black", bins = 30) +
+  facet_grid(bodyStyle ~ nDoors, scales = "free_y") +
+  xlab("Price") +
+  ylab("Frequency") +
+  ggtitle("Distribution of Price by Body Style and nDoors")
+```
+

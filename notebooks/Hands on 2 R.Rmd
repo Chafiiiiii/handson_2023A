@@ -1,0 +1,257 @@
+---
+title: "Hands on: Data Quality and Pre-Processing"
+author: "Andrés Casagualpa"
+date: "2023-06-10"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+
+# 2 Hands On: Data Quality and Pre-Processing
+
+
+### 1. Assessing Data Quality
+
+#### Load the following packages: dplyr, na.tools, tidyimpute (version from github decisionpatterns/tidyimpute”)
+####Load the carInsurance data set about the insurance risk rating of cars based on several characteristics of each car
+```{r}
+# Install and load devtools package to install from GitHub
+install.packages("devtools")
+library(devtools)
+
+# Install and load dplyr package
+install.packages("dplyr")
+library(dplyr)
+
+# Install and load na.tools package
+install.packages("na.tools")
+library(na.tools)
+
+# Install and load tidyimpute package from GitHub
+install_github("decisionpatterns/tidyimpute")
+library(tidyimpute)
+
+```
+
+####  Check if there are any missing values
+```{r}
+# Especifica la ruta y el nombre del archivo
+archivo <- "carInsurance.Rdata"
+
+# Carga el archivo usando read.table()
+carInsurance <- load(archivo)
+ls()
+# Verifica la carga de datos
+print(carInsurance)
+
+```
+```{r}
+# Verificar los valores faltantes usando any_na()
+if (any_na(carInsurance)) {
+  print(paste("No hay valores faltantes en las siguientes columnas:", paste(columnas_faltantes, collapse = ", ")))
+} else {
+  print("Hay valores faltantes en el conjunto de datos.")
+}
+```
+####Count the number of cases that have, at least, one missing value.
+
+
+```{r}
+ls()
+library(dplyr)
+
+cases_with_missing <- carIns %>%
+  filter(if_any(everything(), is.na)) %>%
+  count()
+
+print(paste("El número de casos con al menos un valor faltante es:", cases_with_missing$n))
+
+ 
+```
+
+####(c) Create a new data set by removing all the cases that have missing values.
+```{r}
+carIns_sin_na <- na.omit(carIns)
+
+print(carIns_sin_na)
+```
+#### (d) Create a new data set by imputing all the missing values with 0.
+
+```{r}
+install.packages("tidyverse")
+library(tidyverse)
+# Imputar los valores faltantes con 0 en carIns_sin_na
+carIns_imputed <- carIns_sin_na %>%
+  mutate_all(~replace_na(.x, 0))
+
+# Visualizar el nuevo conjunto de datos con los valores imputados
+print(carIns_imputed)
+
+```
+
+
+####(e) Create a new data set by imputing the mean in all the columns which have double type values
+
+```{r}
+library(dplyr)
+
+# Imputar la media en las columnas con valores de tipo double
+nuevo_carIns_imputado <- carIns_imputed %>% 
+  mutate_if(is.double, ~ifelse(is.na(.), mean(., na.rm = TRUE), .))
+
+# Visualizar el nuevo conjunto de datos con los valores imputados
+print(nuevo_carIns_imputado)
+```
+
+#### (f) Create a new data set by imputing the mode in all the columns which have integer type values.
+
+```{r}
+carIns_imputado <- nuevo_carIns_imputado
+
+# Obtener las columnas enteras del dataframe carIns
+columnas_enteras <- sapply(carIns, is.integer)
+
+# Iterar sobre las columnas enteras y realizar la imputación de la moda
+for (col in names(carIns)[columnas_enteras]) {
+  carIns_imputado[[col]] <- ifelse(is.integer(carIns[[col]]), mode(carIns[[col]]), carIns[[col]])
+}
+
+# Mostrar el nuevo conjunto de datos imputado
+print(carIns_imputado)
+```
+
+#### (g)Create a new data set by imputing the most frequent value to the column ”nDoors”
+
+```{r}
+install.packages("imputeTS")
+library(imputeTS)
+
+nuevoDataSet <- carIns_imputado
+
+# Imputar el valor más frecuente en la columna "nDoors" de "nuevoDataSet"
+nuevoDataSet$nDoors <- na.replace(nuevoDataSet$nDoors, "max")
+
+# Imprimir el nuevo conjunto de datos
+print(nuevoDataSet)
+
+```
+
+####(h) Combine the three last imputations to obtain a final dataset. Are there any duplicated cases?
+
+```{r}
+# Combinar los conjuntos de datos imputados
+conjuntoFinal <- rbind(carIns_imputado, nuevoDataSet, carIns_imputed, nuevo_carIns_imputado)
+
+# Verificar si hay casos duplicados
+duplicados <- conjuntoFinal[duplicated(conjuntoFinal), ]
+cantidadDuplicados <- nrow(duplicados)
+
+# Imprimir los casos duplicados y la cantidad de duplicados
+print(duplicados)
+print(cantidadDuplicados)
+
+```
+
+###2. Data Pre-Processing
+#### 2. Load the package dlookr. Use the same car insurance data set above and apply the following transformations to the price attribute. Be critical regarding the obtained results.
+
+
+```{r}
+install.packages("dlookr")
+
+```
+
+####(a) Apply range-based normalization and z-score normalization.
+
+```{r}
+```
+
+
+### 3. With the seed 111019 obtain the following samples on the car insurance data set
+####  (a) Random sample of 60% of the cases with replacement
+```{r}
+load("C:/Users/LENOVO/Downloads/carInsurance.Rdata")
+install.packages("dplyr")
+library(dplyr)
+
+```
+```{r}
+# Assign the value of the seed
+set.seed(111019)
+random_sample <- carIns %>% 
+  sample_frac(0.6, replace = TRUE)
+
+```
+##### (b) Stratified sample of 60% of the cases of cars, according to the fuelType attribute
+```{r}
+stratified_sample <- carIns %>% 
+  group_by(fuelType) %>% 
+  sample_frac(0.6)
+```
+#### (c) Distribution of values in each sample using the table() function
+```{r}
+table_random_sample <- table(random_sample$fuelType)
+table_stratified_sample <- table(stratified_sample$fuelType)
+```
+###4. Load the package corrplot and select the numeric attributes of the car insurance data set
+```{r}
+install.packages("corrplot")
+library(corrplot)
+```
+
+#####(a) Using the function cor(), obtain the pearson correlation coefficient between each pair of variables.
+```{r}
+load("C:/Users/LENOVO/Downloads/carInsurance.Rdata")
+# Select numeric attributes of the car insurance dataset
+numeric_attributes <- carIns[sapply(carIns, is.numeric)]
+# Pearson correlation coefficient using cor()
+correlation_matrix <- cor(numeric_attributes)
+```
+### (b) Calculate p-values and confidence intervals using cor.mtest()
+```{r}
+correlation_test <- cor.mtest(numeric_attributes)
+```
+### (c) Plot correlation using corrplot()
+```{r}
+corrplot(correlation_matrix, method = "circle", type = "full", tl.cex = 0.8, tl.col = "black")
+
+```
+###5. Load the data set USJudgeRatings, from the datasets package, containing lawyers’ ratings of state judges in the US Superior Court regarding a set of attributes.
+```{r}
+# Load the required packages
+library(datasets)
+library(ggplot2)
+##load the dataset
+data(USJudgeRatings)
+```
+# (a) Apply the prcomp() function to obtain the principal components
+```{r}
+pca <- prcomp(USJudgeRatings[, -1])
+# Inspect the variable loadings
+print(pca$rotation)
+```
+### (b) Plot the two first components using ggplot2
+```{r}
+ # Extract the scores for the first two components
+pca_df <- as.data.frame(pca$x[, 1:2]) 
+# Add the lawyer names as a column
+pca_df$Lawyer <- rownames(USJudgeRatings)  
+
+ggplot(pca_df, aes(PC1, PC2, label = Lawyer)) +
+  geom_point() +
+  geom_text(vjust = 1.5, color = "blue") +
+  xlab("PC1") +
+  ylab("PC2") +
+  ggtitle("Principal Components Analysis") +
+  theme_minimal()
+```
+
